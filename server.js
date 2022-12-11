@@ -3,6 +3,7 @@ const app = express()
 const UserRoute = require('./Routes/User.route')
 const createError = require('http-errors')
 require('dotenv').config()
+require('./helpers/connections_mongodb');
 
 const PORT = process.env.PORT || 3001
 
