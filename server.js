@@ -3,7 +3,7 @@ const app = express()
 const UserRoute = require('./Routes/User.route')
 const createError = require('http-errors')
 require('dotenv').config()
-require('./helpers/connections_mongodb');
+// require('./helpers/connections_mongodb');
 
 const PORT = process.env.PORT || 3001
 
@@ -12,6 +12,8 @@ app.get('/', (req, res) => {
   res.send('Hello World!')
 })
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use('/user', UserRoute)
 
 app.use((req, res, next) => {
