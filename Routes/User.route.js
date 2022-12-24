@@ -2,11 +2,13 @@ const express = require('express')
 const route = express.Router();
 const createError = require('http-errors')
 const User = require('../Models/User.model');
+const { userValidate } = require('../helpers/validation');
 
 route.post('/register', async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    if(!email || !password) throw createError.BadRequest();
+    const { error } = userValidate(req.body);
+    if (error) throw createError(error.details[0].message);
 
     const isExist = await User.findOne({ username: email });
     if (isExist) throw createError.Conflict(`${email} is already been registered.`);
