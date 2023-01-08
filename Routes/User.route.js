@@ -3,7 +3,7 @@ const route = express.Router();
 const createError = require('http-errors')
 const User = require('../Models/User.model');
 const { userValidate } = require('../helpers/validation');
-const { signAccessToken } = require('../helpers/jwt_service');
+const { signAccessToken, verifyAccessToken } = require('../helpers/jwt_service');
 
 route.post('/register', async (req, res, next) => {
   try {
@@ -53,6 +53,14 @@ route.post('/login', async (req, res, next) => {
 
 route.post('/logout', (req, res, next) => {
   res.send('function logout')
+})
+
+route.get('/getList', verifyAccessToken, (req, res, next) => {
+  const list = [{ email: 'example_1@mail.com' }, { email: 'example_2@mail.com' }]
+  return res.json({
+    status: 'Ok',
+    list
+  })
 })
 
 module.exports = route;
