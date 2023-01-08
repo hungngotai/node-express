@@ -13,11 +13,12 @@ route.post('/register', async (req, res, next) => {
     const isExist = await User.findOne({ username: email });
     if (isExist) throw createError.Conflict(`${email} is already been registered.`);
 
-    const isCreate = await User.create({ username: email, password });
+    const user = new User({ username: email, password });
+    await user.save();
 
     return res.json({
       status: 'Ok',
-      elements: isCreate
+      elements: user
     });
   } catch(error) {
     next(error);
@@ -28,8 +29,25 @@ route.post('/refresh-token', (req, res, next) => {
   res.send('function refresh-token')
 })
 
-route.post('/login', (req, res, next) => {
-  res.send('function login')
+route.post('/login', async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    const { error } = userValidate(req.body);
+    if (error) throw createError(error.details[0].message);
+
+    const user = await User.findOne({ username: email });
+    if (!user) throw createError.NotFound(`${email} is not registered.`);
+
+    const isValid = await user.checkPassword(password);
+    if(!isValid) throw createError.Unauthorized();
+
+    return res.json({
+      status: 'Ok',
+      elements: user
+    });
+  } catch(error) {
+    next(error);
+  }
 })
 
 route.post('/logout', (req, res, next) => {
