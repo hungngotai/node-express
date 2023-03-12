@@ -4,7 +4,7 @@ const UserRoute = require('./Routes/User.route')
 const createError = require('http-errors')
 require('dotenv').config()
 // require('./helpers/connections_mongodb');
-
+const redisClient = require('./helpers/connections_redis');
 const PORT = process.env.PORT || 3001
 
 app.get('/', (req, res) => {
