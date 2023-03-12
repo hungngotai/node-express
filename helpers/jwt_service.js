@@ -4,7 +4,7 @@ const JWT = require('jsonwebtoken');
 const signAccessToken = (userId) => {
   return new Promise((res, rej) => {
     const payload = { userId };
-    const secretKey = process.env.APP_KEY;
+    const secretKey = process.env.APP_ACCESS_KEY;
     const options = { expiresIn: '1h' };
 
     JWT.sign(payload, secretKey, options, (error, token) => {
@@ -20,7 +20,7 @@ const verifyAccessToken = (req, res, next) => {
   };
 
   const accessToken = req.headers.authorization.split(' ')[1];
-  JWT.verify(accessToken, process.env.APP_KEY, (error, payload) => {
+  JWT.verify(accessToken, process.env.APP_ACCESS_KEY, (error, payload) => {
     if (error) {
       return next(createError.Unauthorized())
     };
@@ -29,7 +29,21 @@ const verifyAccessToken = (req, res, next) => {
   });
 }
 
+const signRefreshToken = (userId) => {
+  return new Promise((res, rej) => {
+    const payload = { userId };
+    const secretKey = process.env.APP_REFRESH_KEY;
+    const options = { expiresIn: '1y' };
+
+    JWT.sign(payload, secretKey, options, (error, token) => {
+      if (error) rej(error);
+      res(token);
+    });
+  });
+};
+
 module.exports = {
   signAccessToken,
-  verifyAccessToken
+  verifyAccessToken,
+  signRefreshToken
 };

@@ -3,7 +3,7 @@ const route = express.Router();
 const createError = require('http-errors')
 const User = require('../Models/User.model');
 const { userValidate } = require('../helpers/validation');
-const { signAccessToken, verifyAccessToken } = require('../helpers/jwt_service');
+const { signAccessToken, verifyAccessToken, signRefreshToken } = require('../helpers/jwt_service');
 
 route.post('/register', async (req, res, next) => {
   try {
@@ -42,9 +42,11 @@ route.post('/login', async (req, res, next) => {
     if(!isValid) throw createError.Unauthorized();
 
     const accessToken = await signAccessToken(user.id);
+    const refreshToken = await signRefreshToken(user.id);
     return res.json({
       status: 'Ok',
-      accessToken
+      accessToken,
+      refreshToken
     });
   } catch(error) {
     next(error);
