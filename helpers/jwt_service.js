@@ -57,7 +57,7 @@ const verifyRefreshToken = (refreshToken) => {
       if (reply !== refreshToken) {
         return rej(createError.Unauthorized())
       }
-      res(userId);
+      res(payload);
     })
   })
 }
