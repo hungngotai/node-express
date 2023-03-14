@@ -9,10 +9,6 @@ client.on('connected', () => console.log('Redis Client Connected'));
 client.on('ready', () => console.log('Redis Client Ready'));
 (async () => {
   await client.connect();
-  // await client.ping();
-  await client.set('foo', 'bar');
-  const value = await client.get('foo');
-  console.log(value);
 })()
 
 module.exports = client;

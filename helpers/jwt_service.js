@@ -1,11 +1,12 @@
 const createError = require('http-errors');
 const JWT = require('jsonwebtoken');
+const redisClient = require('./connections_redis')
 
 const signAccessToken = (userId) => {
   return new Promise((res, rej) => {
     const payload = { userId };
     const secretKey = process.env.APP_ACCESS_KEY;
-    const options = { expiresIn: '10s' };
+    const options = { expiresIn: '1h' };
 
     JWT.sign(payload, secretKey, options, (error, token) => {
       if (error) rej(error);
@@ -39,6 +40,7 @@ const signRefreshToken = (userId) => {
 
     JWT.sign(payload, secretKey, options, (error, token) => {
       if (error) rej(error);
+      redisClient.set(userId, token);
       res(token);
     });
   });
@@ -46,11 +48,15 @@ const signRefreshToken = (userId) => {
 
 const verifyRefreshToken = (refreshToken) => {
   return new Promise((res, rej) => {
-    JWT.verify(refreshToken, process.env.APP_REFRESH_KEY, (error, payload) => {
+    JWT.verify(refreshToken, process.env.APP_REFRESH_KEY, async (error, payload) => {
       if (error) {
         return rej(createError.BadRequest())
       }
       const { userId } = payload;
+      const reply = await redisClient.get(userId);
+      if (reply !== refreshToken) {
+        return rej(createError.Unauthorized())
+      }
       res(userId);
     })
   })

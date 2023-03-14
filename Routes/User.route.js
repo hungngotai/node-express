@@ -4,6 +4,7 @@ const createError = require('http-errors')
 const User = require('../Models/User.model');
 const { userValidate } = require('../helpers/validation');
 const { signAccessToken, verifyAccessToken, signRefreshToken, verifyRefreshToken } = require('../helpers/jwt_service');
+const redisClient = require('../helpers/connections_redis');
 
 route.post('/register', async (req, res, next) => {
   try {
@@ -27,8 +28,9 @@ route.post('/register', async (req, res, next) => {
 
 route.post('/refresh-token', async (req, res, next) => {
   try {
+
     const { refreshToken } = req.body;
-    const userId = await verifyRefreshToken(refreshToken)
+    const userId = await verifyRefreshToken(refreshToken);
     const accessToken = await signAccessToken(userId);
     const newRefreshToken = await signRefreshToken(userId);
     return res.json({
@@ -65,8 +67,18 @@ route.post('/login', async (req, res, next) => {
   }
 })
 
-route.post('/logout', (req, res, next) => {
-  res.send('function logout')
+route.post('/logout', async (req, res, next) => {
+  try {
+    const { refreshToken } = req.body;
+    console.log(refreshToken);
+    const userId = await verifyRefreshToken(refreshToken);
+    redisClient.del(userId);
+    return res.json({
+      status: 'Ok'
+    })
+  } catch (error) {
+    next(error);
+  }
 })
 
 route.get('/getList', verifyAccessToken, (req, res, next) => {
